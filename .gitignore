@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# pickle and files
+.pkl
+data/
+pickle_ag/
+pickle_ag2/
