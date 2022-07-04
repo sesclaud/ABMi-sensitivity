@@ -55,6 +55,9 @@ am_counts_df = pd.read_csv('data/am_counts_df_mani.csv')
 rescaled_ts = pd.read_csv('data/rescaled_ts.csv')
 orari = pd.read_csv('data/orari.csv')
 fermate = pd.read_csv('data/fermate.csv')
+act_probs_df = pd.read_csv('data/act_probs_df', index_col=0)
+act_list = list(pd.read_csv('data/act_list', index_col=0).to_dict('list').values())
+acti_count = pd.read_csv('data/acti_count', index_col=0).to_dict('list')
 
 
 ############################################################################################################
@@ -161,6 +164,105 @@ def gen_agent(n, d_ages = d_ages, d_activities = d_activities, age_distro = age_
                                                      act_stops[counter]])
                     counter += 1
                     
+        all_activities += act_by_age
+              
+    agents = np.array([all_ages, all_homes, all_nils, all_activities], dtype = object).T
+    agents_df = pd.DataFrame(agents).rename(columns = {0: "Age", 1: "Home", 2: "NIL", 3: "Activities"})
+    agents_df["Num_Activities"] = agents_df.Activities.apply(lambda x: len(x)) 
+    agents_df = agents_df[agents_df["Num_Activities"] > 0]
+    agents = agents_df.T.to_dict()
+    
+    return agents, agents_df
+
+
+
+# generate dictionary and dataframe of agents --> STRATEGY 2
+def gen_agent2(n, d_ages = d_ages, d_activities = d_activities, age_distro = age_distro, nil_age = nil_age, fermate_nils = fermate_nils, 
+                am_counts_df_prob = am_counts_df_prob, am_counts_df = am_counts_df, rescaled_ts = rescaled_ts, 
+                act_probs_df = act_probs_df, act_list = act_list, acti_count = acti_count):
+    """
+    Generating an agent in the following way:
+    Draw an age class, conditionally on which a NIL is drawn plus a random stop inside it as the agent's home.
+    Each agent is forced to perform n (= 3) activities, of type drawn independently with replacement among the 5 possible.
+    The list of possible combinations is given as an input (act_list).
+    Each of the activities the agent will carry out are mapped to stops on the network proportionally to the number 
+    of amenities corresponding to that activity present in each stop.
+    Finally, the departure times for these activities are drawn. 
+    The outputs are a dataframe and a dictionary with an agent for row and key respectively.
+    """
+    all_ages = []
+    all_nils = []
+    all_homes = []
+    all_activities = []
+    
+    age = multinomial(n, age_distro.Proportion) # n independent multinomial draws
+    age_nonzero = age.nonzero()[0] # position in age^ maps to age group
+    age_count = age[age>0] # how many agents per age group
+    ids_ages =  np.hstack([[x] * y for x, y in zip(age_nonzero, age_count)]) # joins the information of the previous 2 arrays
+    all_ages = [d_ages[x] for x in ids_ages] # retrieves n age groups
+    
+    for age_id, count_by_age in zip(age_nonzero, age_count): # iterating to draw NILs and schedules age by age
+        age_class = d_ages[age_id] # current age group
+        
+        nil_by_age_df = nil_age[nil_age["Età (classi funzionali)"] == age_class].reset_index(drop = True) # NILs for curr. age group
+        nil = multinomial(count_by_age, nil_by_age_df.nil_distro) # as many multinomial draws of NILs as agents from curr. age
+        nil_nonzero = nil.nonzero()[0] # position in nil^ maps to NIL
+        nil_count = nil[nil>0] # how many agents living in each NIL in this age group
+        ids_nils =  np.hstack([[x] * y for x, y in zip(nil_nonzero, nil_count)]) # joins the information of the previous 2 arrays
+        nils = nil_by_age_df.loc[ids_nils, "NIL (Nuclei di Identità Locale)"].reset_index(drop = True).sample(frac = 1).tolist() # retrieves list of NILs
+        all_nils += nils # add them to the list of all NILs
+        
+        for index, i in enumerate(nil_nonzero): 
+            nil_ = nil_by_age_df.loc[i, "NIL (Nuclei di Identità Locale)"] # retrieve NIL
+            if nil_ != "CHIARAVALLE":
+                homes = np.random.choice(fermate_nils[fermate_nils["nil"] == nil_].stop_id,nil_count[index])
+            else:
+                homes =  np.random.choice(fermate_nils[fermate_nils["nil"] == "PARCO DELLE ABBAZIE"].stop_id, nil_count[index])
+                # since "Chiaravalle" has no stops, draw a stop from "Parco delle Abbazie"                     
+            all_homes += list(homes)
+            
+        act_by_age = []
+       
+        acts_ = multinomial(count_by_age, act_probs_df[age_class]) 
+        
+        for i, comb in enumerate(act_list):
+            num_ag = acts_[i]
+            act_by_comb = [[] for ind in range(num_ag)]
+            
+            if num_ag > 0: 
+                for act in set(comb):
+                    activity = d_activities[act] # retrieve activity
+                    count_ = acti_count[act][i]
+                    num_act = count_*num_ag
+                    
+                    
+                    if activity != "lavoro familiare": # find stop for each activity
+                        act_stop = multinomial(num_act, am_counts_df_prob[activity]) 
+                        act_stop_nonzero = act_stop.nonzero()[0]
+                        act_stop_count = act_stop[act_stop>0]
+                        id_act_stop = np.hstack([[j] * k for j, k in zip(act_stop_nonzero, act_stop_count)])
+                        act_stops = am_counts_df.loc[id_act_stop, "stops_id"].tolist() 
+                        random.shuffle(act_stops)
+                    else: # if activity = "lavoro familiare" agents the destination is "home"
+                        act_stops = ["home"]*num_act
+                                
+                    # find departure time for each activity
+                    departures_df = rescaled_ts[(rescaled_ts["Age"] == age_class) & (rescaled_ts["Activity"] == activity)].reset_index(drop = True)
+                    departure = multinomial(num_act, departures_df.Density)
+                    departure_nonzero = departure.nonzero()[0]
+                    departure_count = departure[departure>0]
+                    id_departures = np.hstack([[j] * k for j, k in zip(departure_nonzero, departure_count)])
+                    departures = departures_df.loc[id_departures, "Time_lag"].tolist()
+                    random.shuffle(departures)
+
+                    counter = 0
+                    for a in range(num_ag):
+                        for a2 in range(count_):
+                            act_by_comb[a].append([activity, str_to_minutes(departures[counter]) + random.randrange(-5,5), act_stops[counter]])
+                            counter += 1
+                    
+            act_by_age += act_by_comb
+
         all_activities += act_by_age
               
     agents = np.array([all_ages, all_homes, all_nils, all_activities], dtype = object).T
@@ -661,6 +763,66 @@ def simulation(G, n = False, start = 300, end = 1500, import_agents = False, imp
         tic = time.time()
         agents, agents_df = gen_agent(n, d_ages, d_activities)
         toc = time.time()
+        print(f"Generated {n} agents in", round(toc-tic,1),"seconds")
+        print("Initializing agents:")
+        tic = time.time()
+        agents_list = gen_agents_objects(agents, percorsi, foot, orari, G)
+        toc = time.time()
+        print(f"Initialized {len(agents_list)} agents objects in", round(toc-tic,1),"seconds")
+    
+    elif import_agents != False and import_agents_ob == False:
+        file = open(import_agents, 'rb')
+        agents = pickle.load(file)
+        file.close()
+        print("Initializing imported agents:")
+        tic = time.time()
+        agents_list = gen_agents_objects(agents, percorsi, foot, orari, G)
+        toc = time.time()
+        print(f"Initialized {len(agents_list)} agents objects in", round(toc-tic,1),"seconds")
+
+    elif import_agents == False and import_agents_ob != False:
+        file = open(import_agents_ob, 'rb')
+        agents_list = pickle.load(file)
+        file.close()
+        print(f"Imported {len(agents_list)} agents objects")
+    
+    else:
+        raise Exception("Cannot import both agents and agents objects!")
+
+    if reset_agents == True:
+        for a in agents_list:
+            a.reset()
+    
+    print("Running the simulation:")
+    agents_list2, history_, traveling_on_edge, traveling_on_edge_set, moving_agents, daily_passengers, daily_waiters, full_edges = model(G, agents_list, d_active_edges, start = start, end = end)
+
+    return agents_list2, history_, traveling_on_edge, traveling_on_edge_set, moving_agents, daily_passengers, daily_waiters, full_edges
+
+
+def simulation2(G, n = False, start = 300, end = 1500, import_agents = False, agents_strategy = 1, import_agents_ob = False, reset_agents = True,
+               d_ages = d_ages, d_activities = d_activities, age_distro = age_distro, nil_age = nil_age, fermate_nils = fermate_nils, 
+               activities = activities, am_counts_df_prob = am_counts_df_prob, am_counts_df = am_counts_df, rescaled_ts = rescaled_ts,
+               percorsi = percorsi, foot = foot, orari = orari, d_active_edges = d_active_edges):
+    '''
+    Generates/ imports agents and runs the simulation. 
+    Specify the number n of agents to generate. 
+    To import agents object from pickle, write the path in import_agents_ob.
+    To import agents' schedules from pickle, write the path in import_agents.
+    
+    '''
+
+    if import_agents == False and import_agents_ob == False and n == False:
+        raise Exception("The number of agents must be specified!")
+
+    elif import_agents == False and import_agents_ob == False and n != False:
+        if agents_strategy == 1:
+            tic = time.time()
+            agents, agents_df = gen_agent(n, d_ages, d_activities)
+            toc = time.time()
+        elif agents_strategy == 2:
+            tic = time.time()
+            agents, agents_df = gen_agent2(n, d_ages, d_activities)
+            toc = time.time()
         print(f"Generated {n} agents in", round(toc-tic,1),"seconds")
         print("Initializing agents:")
         tic = time.time()
