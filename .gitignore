@@ -130,7 +130,10 @@ dmypy.json
 
 
 # pickle and files
-.pkl
+*.pkl
 data/
 pickle_ag/
 pickle_ag2/
+data_sensitivity/
+prova_s/
+*.csv

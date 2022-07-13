@@ -10,8 +10,7 @@ import seaborn as sns
 import networkx as nx
 import random
 from itertools import combinations
-# from geopy import distance
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import time
 from numpy.random import multinomial
 from operator import itemgetter
@@ -417,12 +416,12 @@ def display_side_by_side(*args,titles=cycle([''])):
     display_html(html_str,raw=True)
 
 # generate agents objects
-def gen_agents_objects(agents, percorsi, foot, orari, G):
+def gen_agents_objects(agents, percorsi, foot, orari, G, p_long = 0.7):
     agents_list = []
     couldntreach = []
     i = 0
     # for i, a in tqdm(enumerate(agents.values())):
-    for k in tqdm(agents):
+    for k in tqdm(agents,leave=False):
         a = agents[k]    
         home = a["Home"] # stop 
         acts_ = a['Activities']
@@ -455,14 +454,14 @@ def gen_agents_objects(agents, percorsi, foot, orari, G):
         if last_act_ != 'lavoro familiare':
 
             if last_time <= 780: # if last activity is in the first "half" of the day (before 1pm)
-                if random.random() < 0.7:
+                if random.random() < p_long:
                     back_home = last_time + 40 + d_last_times[last_act_] + random.randrange(-10,10) 
                   # t go home = t last act + 40 min (avg traveling time) + avg duration of last activity + noise
                 else:
                     back_home = last_time + 40 + d_last_times2[last_act_] + random.randrange(-10,10)
                 schedule[len(schedule)] = (home, back_home)
             else:
-                if random.random() < 0.7:
+                if random.random() < p_long:
                     critical_time = last_time + 40 + d_last_times2[last_act_]
                     if critical_time <= 1310:
                         back_home = critical_time + random.randrange(-10,10)
@@ -582,7 +581,7 @@ def model(G, agents_list, d_active_edges, start = 300, end = 1500):
     agents_waiting = []
 
     
-    for t in tqdm(range(start, end)):
+    for t in tqdm(range(start, end),leave=False):
         #----------------------------------- loop over busy agents--------------------------------#
         busy_copy = agents_busy.copy()
         random.shuffle(busy_copy)
@@ -747,7 +746,7 @@ def model(G, agents_list, d_active_edges, start = 300, end = 1500):
 def simulation(G, n = False, start = 300, end = 1500, import_agents = False, import_agents_ob = False, reset_agents = True,
                d_ages = d_ages, d_activities = d_activities, age_distro = age_distro, nil_age = nil_age, fermate_nils = fermate_nils, 
                activities = activities, am_counts_df_prob = am_counts_df_prob, am_counts_df = am_counts_df, rescaled_ts = rescaled_ts,
-               percorsi = percorsi, foot = foot, orari = orari, d_active_edges = d_active_edges):
+               percorsi = percorsi, foot = foot, orari = orari, d_active_edges = d_active_edges, p_long = 0.7):
     '''
     Generates/ imports agents and runs the simulation. 
     Specify the number n of agents to generate. 
@@ -766,7 +765,7 @@ def simulation(G, n = False, start = 300, end = 1500, import_agents = False, imp
         print(f"Generated {n} agents in", round(toc-tic,1),"seconds")
         print("Initializing agents:")
         tic = time.time()
-        agents_list = gen_agents_objects(agents, percorsi, foot, orari, G)
+        agents_list = gen_agents_objects(agents, percorsi, foot, orari, G, p_long)
         toc = time.time()
         print(f"Initialized {len(agents_list)} agents objects in", round(toc-tic,1),"seconds")
     
@@ -776,7 +775,7 @@ def simulation(G, n = False, start = 300, end = 1500, import_agents = False, imp
         file.close()
         print("Initializing imported agents:")
         tic = time.time()
-        agents_list = gen_agents_objects(agents, percorsi, foot, orari, G)
+        agents_list = gen_agents_objects(agents, percorsi, foot, orari, G, p_long)
         toc = time.time()
         print(f"Initialized {len(agents_list)} agents objects in", round(toc-tic,1),"seconds")
 
@@ -802,7 +801,7 @@ def simulation(G, n = False, start = 300, end = 1500, import_agents = False, imp
 def simulation2(G, n = False, start = 300, end = 1500, import_agents = False, agents_strategy = 1, import_agents_ob = False, reset_agents = True,
                d_ages = d_ages, d_activities = d_activities, age_distro = age_distro, nil_age = nil_age, fermate_nils = fermate_nils, 
                activities = activities, am_counts_df_prob = am_counts_df_prob, am_counts_df = am_counts_df, rescaled_ts = rescaled_ts,
-               percorsi = percorsi, foot = foot, orari = orari, d_active_edges = d_active_edges):
+               percorsi = percorsi, foot = foot, orari = orari, d_active_edges = d_active_edges, act_list = act_list, acti_count=acti_count, act_probs_df=act_probs_df, p_long = 0.7):
     '''
     Generates/ imports agents and runs the simulation. 
     Specify the number n of agents to generate. 
@@ -821,12 +820,12 @@ def simulation2(G, n = False, start = 300, end = 1500, import_agents = False, ag
             toc = time.time()
         elif agents_strategy == 2:
             tic = time.time()
-            agents, agents_df = gen_agent2(n, d_ages, d_activities)
+            agents, agents_df = gen_agent2(n, d_ages, d_activities, acti_count=acti_count, act_list=act_list, act_probs_df=act_probs_df)
             toc = time.time()
         print(f"Generated {n} agents in", round(toc-tic,1),"seconds")
         print("Initializing agents:")
         tic = time.time()
-        agents_list = gen_agents_objects(agents, percorsi, foot, orari, G)
+        agents_list = gen_agents_objects(agents, percorsi, foot, orari, G, p_long)
         toc = time.time()
         print(f"Initialized {len(agents_list)} agents objects in", round(toc-tic,1),"seconds")
     
@@ -836,7 +835,7 @@ def simulation2(G, n = False, start = 300, end = 1500, import_agents = False, ag
         file.close()
         print("Initializing imported agents:")
         tic = time.time()
-        agents_list = gen_agents_objects(agents, percorsi, foot, orari, G)
+        agents_list = gen_agents_objects(agents, percorsi, foot, orari, G, p_long)
         toc = time.time()
         print(f"Initialized {len(agents_list)} agents objects in", round(toc-tic,1),"seconds")
 
@@ -861,6 +860,60 @@ def simulation2(G, n = False, start = 300, end = 1500, import_agents = False, ag
 ##################################################################################
 ################################### STATISTICS ###################################
 ##################################################################################
+
+
+def simulation_results(agents_list, history_, G, run, results = False):
+
+    '''
+    Returns a dataframe containing outputs of an executed simulation.
+    '''
+
+    # traveling_on_edge, traveling_on_edge_set, moving_agents, daily_passengers, daily_waiters, full_edges
+    num_agents = len(agents_list)
+    finished = 0 #counting the number of finished agents
+
+    avg_waiting_time_tot = 0
+    avg_traveling_time_tot = 0
+    avg_number_activities = 0
+    vehicles = []
+    time_distance_dist = []
+
+    for a in agents_list:
+        avg_waiting_time_tot += a.waiting_time/len(a.schedule)
+        avg_traveling_time_tot += a.traveling_time/len(a.schedule)
+        avg_number_activities += len(a.schedule)
+        if a.state == "finished":
+            finished += 1
+        if len(a.path) != 0:
+            counter = int(a.path[0][2] != "foot")
+            for j in range(len(a.path) - 1):
+                if a.path[j][2] != a.path[j+1][2] and a.path[j+1][2] != "foot":
+                    counter +=1
+            vehicles.append(counter)
+   
+
+    avg_waiting_time_tot = avg_waiting_time_tot / num_agents
+    avg_traveling_time_tot = avg_traveling_time_tot / num_agents
+    avg_number_activities = avg_number_activities / num_agents
+
+    finished_perc = round(finished/len(agents_list), 2)
+    avg_traveling_per_dest = round(avg_traveling_time_tot, 1)
+    avg_waiting_per_dest = round(avg_waiting_time_tot, 1)
+    num_vehicles = round(np.mean(vehicles), 1)
+    time_distance_dist = time_distance_distribution(history_, G)[0]
+
+    if type(results) == bool and results == False:
+        results = pd.DataFrame(data = [run, num_agents, finished_perc, avg_number_activities, avg_traveling_per_dest, avg_waiting_per_dest, num_vehicles, time_distance_dist]).T
+        results.rename(columns = {0:'Run', 1:'Num_Agents', 2:'Finished', 3:'Avg_num_activities', 4:'Avg_traveling_per_dest', 5:'Avg_waiting_per_dest', 6:'Num_Vehicles', 7:'Time_distance_distribution'}, inplace=True)
+    elif type(results) == pd.DataFrame:
+        res =  pd.DataFrame(data = [run, num_agents, finished_perc, avg_number_activities, avg_traveling_per_dest, avg_waiting_per_dest, num_vehicles, time_distance_dist]).T
+        res.rename(columns = {0:'Run', 1:'Num_Agents', 2:'Finished', 3:'Avg_num_activities', 4:'Avg_traveling_per_dest', 5:'Avg_waiting_per_dest', 6:'Num_Vehicles', 7:'Time_distance_distribution'}, inplace=True)
+        results = pd.concat([results,res])
+    else:
+        raise Exception ('Please provide a DataFrame to append results.')
+    return results
+
+
 
 def summary_stats(agents_list, sum_print = True):
     '''
@@ -905,6 +958,9 @@ def summary_stats(agents_list, sum_print = True):
         print("Average waiting time per destination:","all agents:",round(avg_waiting_time_tot/avg_number_activities, 1),"only finished agents:",round(avg_waiting_time_fin/avg_number_activities, 1))
     
     return avg_waiting_time_tot, avg_traveling_time_tot, avg_waiting_time_fin, avg_traveling_time_fin, avg_number_activities
+
+
+
 
 
 def moving_ts_plot(moving_agents):
@@ -1167,7 +1223,7 @@ def stops_in_path(agents_list, stops, actual = True):
                         
     return agents
 
-def time_distance_distribution(history, G):
+def time_distance_distribution(history_, G):
     """
     Returns a list of distance-adjusted time for single destination
     """
@@ -1177,8 +1233,8 @@ def time_distance_distribution(history, G):
     times = []
     time_distances = []
     
-    for i in history.index:
-        row = history.loc[i,:]
+    for i in history_.index:
+        row = history_.loc[i,:]
         trip_time = 0
         trip_distance = 0
         
@@ -1196,6 +1252,8 @@ def time_distance_distribution(history, G):
                         trip_distance += weight*speed
                     
             elif started:
+                if trip_distance == 0:
+                    print(i)
                 time_distances.append(trip_time/trip_distance)
                 distances.append(trip_distance)
                 times.append(trip_time)
