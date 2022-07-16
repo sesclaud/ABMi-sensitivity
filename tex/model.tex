@@ -1,0 +1,48 @@
+\section{The Model}
+The proposed model aims at simulating the mobility of individuals in Milan that use the public transport services, exploring the consequences of shocks and interventions that can affect directly the transport network. Specifically, the elements that constitute the model are:
+\begin{itemize}
+    \item The environment: the public transport network of Milan, including metro, tram, bus and filobus lines. 
+    \item The agents: synthetic individuals, constituting the flow of passengers on ATM vehicles.
+    \item The time: the simulation is based on data regarding an ordinary week day, from 5:00 a.m. to 1.00 a.m. of the next day and each step represents 1 minute (for a total of 1200 steps).
+    \item The rules: agents, according to their schedules, move on the network, respecting the timetables and the availability in terms of capacity on the vehicles.
+\end{itemize}
+The idea is to generate synthetic agents, place them on the graph representing the transport network of the city of Milan, and let them move around the city according to their schedules. Individuals interact with each others as they compete to get on the same vehicle, given that vehicles have limited capacity. Moreover, they interact with the environment, since they choose the shortest path to their destinations, according to network-specific attributes (i.e. distance between stops, speeds of the vehicles, lines' timetables). 
+
+\subsection{Data and manipulation}\label{sec3}
+The model is based on different datasets describing the Milan's transport network and population. We distinguish between those needed to build the transport network and those used in the process of synthesizing the population and highlight the main steps of the manipulation process.\\ \\
+The datasets used to build the network are the following:
+\begin{enumerate}
+    \item two datasets \cite{site1, site5} from Comune di Milano's open data, containing the main features characterizing each route of the underground lines and  of the surface transit lines respectively: an id number, the mean of transport, the line, the terminal points and their geographical coordinates, the length and the number of stops. Multiple routes can correspond to the same line. 
+    \item two datasets \cite{site2, site6} from Comune di Milano's open data, containing the AMAT\footnote{Agenzia Mobilità Ambiente e Territorio, an agency, present in the municipality of Milan, that provides services to support the municipal functions in the fields of planning, programming, management, monitoring and control relating to the development of the territory and greenery, urban planning, mobility and transport public \cite{site21}.} id, the line name and number, the geographical coordinates and the location of all the stops of the metro lines and of the surface transit lines respectively.
+    \item two datasets \cite{site3, site7} from Comune di Milano's open data, containing the sequence of stops for each route of the underground lines and of the surface transit lines respectively;
+    \item two datasets \cite{site4, site8} from Comune di Milano's open data, containing the starting time, the ending time, the type of day (weekday, holiday, weekend) for each route of the underground lines and  of the surface transit lines respectively. 
+    \item datasets \cite{site12} of GTFS\footnote{General Transit Feed Specification, common format for public transportation schedules and associated geographic information} containing, for each stop, the transit times of all the means of transport. 
+    \item dataset mapping each stop, defined as a couple of geographic coordinates, to the NIL it belongs to, obtained from an open map of Milan \cite{site22}.
+    \item dataset of OpenStreetMaps containing information about the geographic area of Milan and the main points of interests.
+\end{enumerate} 
+We discard the routes running only on weekends and holidays and, for each route, we obtain the couples of ordered stops representing the sequence. Moreover, we obtain, from the OpenStreetMaps file, the complete list of the points of interest of selected types, which we categorize into 'amenity', 'shop', 'school', 'leisure', 'office'.\\\\
+The datasets used to synthesize the population are the following:
+\begin{enumerate}
+\setcounter{enumi}{7}
+    \item dataset \cite{site18} from Sistema Statistico Integrato of Milan, containing the distribution of resident people in Milan in 2021 by age and by NIL\footnote{Nuclei d'Identità Locale, partition of the territory of Milan, introduced in the PGT (Piano di Governo del Territorio).}.
+    \item dataset \cite{site10} from ISTAT, containing the distribution of oriented movements ("trasporti finalizzati") for a specific activity by class age during an ordinary weekday (updated to 2013). The population is split in 4 age classes (15-44, 25-44, 45-64 and over 65 years-old) and there are 7 possible activities.
+    \item dataset \cite{site11} from ISTAT, showing the average percentage of people performing specific activities by age class in each specific 10-minute time slot during an ordinary weekday (updated to 2013). There are 6 possible activities, included that of oriented movements.
+\end{enumerate}
+First, we adapt the different distributions, as to have equal age classes. We discard the "volunteering" activity, for which we only have the distribution of oriented movements but we have no information about the proportion of individuals performing it, and we standardize the distributions accordingly. The final list of activities we consider is the following: sleep/eat/personal care, education, family work, paid work, free time. Finally, we rescale the activities proportions time series by the proportion of people traveling 40 minutes earlier, 40 being the average duration of daily public transit usage in Milan \cite{bib2}. The intuition is that we want the probability of each age class carrying out a specific activity in a given time slot to be higher when a greater proportion of individuals of that given class was traveling 40 minutes earlier.
+
+\subsection{The Network}\label{sec3}
+
+
+
+The environment on which agents move is a graph representing the public transport network of Milan: each node identifies a stop, while the edges connecting them denote the routes of the different transportation means \cite{site3, site7}. In this way, two consecutive stops on the same transport line are joined by an edge. Our graph is a directed multigraph, meaning that all the edges point in a single direction, and between two nodes there may be more than one link of different type. In our specific case, this happens when there are multiple routes that pass through two consecutive stops. The graph has been created in Python, using the NetworkX package which permits to define, manipulate and study the structure and the functions of complex networks. At the end of this process, the final graph contains a total of 4753 nodes and 18470 edges. 
+
+To compute the distances and better visualize the network, all the stops are placed in space using their real geographic coordinates \cite{site2,site6}. We assign to each stop, using web-scraping techniques since no complete source was available, the Nucleo d'Identità Locale (NIL) it belongs to, among the 89 NILs in which Milan's area is divided. This will allow us to exploit, when generating the agents, demographic data at a more granular level and make the population synthesis more accurate. 
+
+So far, our nodes are connected only through the existing transport lines. However, in reality, people usually move among stops of different lines when they are close to each other, for example on the opposite side of the road. In order to allow agents to move in a more realistic way, we have decided to connect stops that are less than 200 meters away from each other with an edge that represents a walking path. The final network is shown in figure \ref{original_network}.
+
+
+During the graph generation process, we have also assigned several attributes to both the nodes and the edges. First of all, each node is characterised by a unique id, which corresponds to the official AMAT id, and a dictionary that contains the number of points of interests which are at most 500 meters away from the stop. In particular, the points of interest and their location have been retrieved using OpenStreetMap data \cite{site9}. The source provides several classes of categories, but, as explained more in details in section \ref{subsec5}, only four of these classes have been selected: food, leisure, school and office. 
+Secondly, each edge is identified by the id of the two nodes that it connects and the specific line of the mean of transport (eg. 11497, 11500, TRAM12). Its attributes are: transport mode, total capacity, weight, next edges, waiting list and passengers list. The total capacity \cite{site13,site14,site15,site16} and the weight depend on the transport mode. Specifically, the weight can be considered as the traveling time between two stops, which is computed dividing the distance between stops by the average commercial speed of the vehicle \cite{site17}. Next edges is a list which, in most cases, refers to the following edge on the same line. However, there are cases in which forks require a single edge to have two “next edges”. Additionally, foot edges do not have “next edges”. Finally, the waiting list and the passengers list allow to identify the travellers that are waiting for and boarding the vehicle. 
+
+
+ 
