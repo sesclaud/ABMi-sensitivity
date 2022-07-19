@@ -20,7 +20,7 @@ The datasets used to build the network are the following:
     \item dataset mapping each stop, defined as a couple of geographic coordinates, to the NIL it belongs to, obtained from an open map of Milan \cite{site22}.
     \item dataset of OpenStreetMaps containing information about the geographic area of Milan and the main points of interests.
 \end{enumerate} 
-We discard the routes running only on weekends and holidays and, for each route, we obtain the couples of ordered stops representing the sequence. Moreover, we obtain, from the OpenStreetMaps file, the complete list of the points of interest of selected types, which we categorize into 'amenity', 'shop', 'school', 'leisure', 'office'.\\\\
+We discard the routes running only on weekends and holidays and, for each route, we obtain the couples of ordered stops representing the sequence. Moreover, we obtain, from the OpenStreetMaps file, the complete list of the points of interest of selected types, which we categorize into 'amenity', 'shop', 'school', 'leisure', 'office'. \\\\
 The datasets used to synthesize the population are the following:
 \begin{enumerate}
 \setcounter{enumi}{7}
@@ -32,17 +32,71 @@ First, we adapt the different distributions, as to have equal age classes. We di
 
 \subsection{The Network}\label{sec3}
 
+Data sources 1 to 4 are combined to construct a directed multigraph representing the public transport network of Milan: each node identifies a stop, while an edge between two stops denote the existence of a route of any transportation mean connceting them. In this way, two consecutive stops on the same transport line are joined by an edge. All the edges point in a single direction, and between two nodes there may be more than one link of different type. In our specific case, this happens when there are multiple routes that pass through two consecutive stops. We consider only the routes that are active during weekdays.
 
+To compute the distances and better visualize the network, all the stops are placed in space using their real geographic coordinates \cite{site2,site6}.  
+We add to the network edges representing a walking path connecting those stops that are not connected through transportation means but are close enough to be reached on foot from one another. In the original verion, we say that two stops are at walking distance if the geodesic distance between them is of maximum 200 meters. 
+The final graph, including transport means and walking paths, contains a total of 4753 nodes and 18470 edges. 
 
-The environment on which agents move is a graph representing the public transport network of Milan: each node identifies a stop, while the edges connecting them denote the routes of the different transportation means \cite{site3, site7}. In this way, two consecutive stops on the same transport line are joined by an edge. Our graph is a directed multigraph, meaning that all the edges point in a single direction, and between two nodes there may be more than one link of different type. In our specific case, this happens when there are multiple routes that pass through two consecutive stops. The graph has been created in Python, using the NetworkX package which permits to define, manipulate and study the structure and the functions of complex networks. At the end of this process, the final graph contains a total of 4753 nodes and 18470 edges. 
-
-To compute the distances and better visualize the network, all the stops are placed in space using their real geographic coordinates \cite{site2,site6}. We assign to each stop, using web-scraping techniques since no complete source was available, the Nucleo d'Identità Locale (NIL) it belongs to, among the 89 NILs in which Milan's area is divided. This will allow us to exploit, when generating the agents, demographic data at a more granular level and make the population synthesis more accurate. 
-
-So far, our nodes are connected only through the existing transport lines. However, in reality, people usually move among stops of different lines when they are close to each other, for example on the opposite side of the road. In order to allow agents to move in a more realistic way, we have decided to connect stops that are less than 200 meters away from each other with an edge that represents a walking path. The final network is shown in figure \ref{original_network}.
-
-
-During the graph generation process, we have also assigned several attributes to both the nodes and the edges. First of all, each node is characterised by a unique id, which corresponds to the official AMAT id, and a dictionary that contains the number of points of interests which are at most 500 meters away from the stop. In particular, the points of interest and their location have been retrieved using OpenStreetMap data \cite{site9}. The source provides several classes of categories, but, as explained more in details in section \ref{subsec5}, only four of these classes have been selected: food, leisure, school and office. 
-Secondly, each edge is identified by the id of the two nodes that it connects and the specific line of the mean of transport (eg. 11497, 11500, TRAM12). Its attributes are: transport mode, total capacity, weight, next edges, waiting list and passengers list. The total capacity \cite{site13,site14,site15,site16} and the weight depend on the transport mode. Specifically, the weight can be considered as the traveling time between two stops, which is computed dividing the distance between stops by the average commercial speed of the vehicle \cite{site17}. Next edges is a list which, in most cases, refers to the following edge on the same line. However, there are cases in which forks require a single edge to have two “next edges”. Additionally, foot edges do not have “next edges”. Finally, the waiting list and the passengers list allow to identify the travellers that are waiting for and boarding the vehicle. 
-
-
+Both nodes and edges have been endowed with some attributes.
+Each node is characterised by a unique id, which corresponds to the official AMAT id. and a dictionary that contains the number of points of interests which are at most 500 meters away from the stop. For each stop, using data from dataset 7, we compute the number of reachable points of interests corresponding to schools, offices, amenities, and food courts. We say that a point of interest is reachable if its geodesic distance from the stop is less than or equal to a number r, which in the original version was set to correspond to 500 meters.  
  
+Each edge is identified by the id of the two nodes that it connects and the specific line of the mean of transport (eg. 11497, 11500, TRAM12). Its attributes are: transport mode, total capacity, weight, next edges, waiting list and passengers list. The total capacity \cite{site13,site14,site15,site16} and the weight depend on the transport mode. Specifically, the weight represents the traveling time between two stops, which is computed dividing the distance between stops by the average commercial speed of the vehicle \cite{site17}. Next edges is a list which, in most cases, refers to the following edge on the same line. However, there are cases in which forks of the line require a single edge to have two “next edges”. Instead, foot edges do not have “next edges”. Finally, the waiting list and the passengers list are created as empty lists, which will be fill during the simulation to allow to identify the travellers that are waiting for and boarding each vehicle. 
+
+
+ \subsection{The Agents}\label{sec3}
+ 
+Agents in the model belong to one among 4 possible age classes: 15-24, 25-44, 45-64 and over 65. They start their daily routine at home, perform 1 to 5 activities (among education, work, leisure, self-care/eating \footnote{ISTAT actually provides a category that includes eat, sleep and other self-care. However, given the time horizon we consider (5:00 a.m  to 1:00 a.m), we assume that “sleep” can be neglected.} and housework) and, eventually, go back home. Datasets from 8 to 10 are used to create a population which resembles the real population of residents in Milan.  
+The creation of the synthetic population proceeds through different steps.
+%  as summarised in the algorithm \ref{alg1} below.
+
+First of all, for each agent we draw an age class from the distribution of inhabitants of Milan. Then, we draw a NIL for the agent's house from the distribution of the NILs conditional on the chosen age group \cite{site18}. After this, we draw uniformly at random, from the stops in the selected NIL, a precise node which represents the agent’s home. 
+
+At this point, two possible strategies can be adopted to assign a travel diary to the agents:
+\begin{itemize}
+    \item \textbf{Strategy 1.} For each of the five possible activities we decide whether the agent will or not perform it during the day, by drawing from a Bernoulli with parameter equal to the probability that the agent carries it out such activity in an ordinary weekday, conditional on the agent's age class. Data used to construct this probability distribution come from dataset 9. Adopting this strategy, each agent can have a variable number of activities to carry out, ranging from 1 to 5.
+    \item \textbf{Strategy 2.} Agents are forced to perform a number k of activities, drawn with replacement from the distribution of the combinations of activities conditional on the age group they belong to. Specifically, we consider the choices of activities as independent from each other, so that the conditional probability of a combination of activities corresponds to the product of the conditional probabilities of the single activities.
+\end{itemize}
+In the original version of the model, strategy 1 has been adopted. We have realized that, on average, using stratey 1, around $20\%$ of the initially generated agents do not have any planned activity in their schedule and, therefore, we have decided to discard them. Experiments show that, on average, agents' schedule only contain 2 activities. To make the results of the two strategies comparable, the parameter k for the second strategy has been set to 2.
+
+We assign a location to each activity selected for the agent (i.e., the specific node in the network) with probability proportional to the number of facilities corresponding to that task located nearby each node \cite{site9}. Among the possible categories proposed by OpenStreetMap, we only take into consideration the ones that match the ISTAT activities (eg. schools, universities, etc. for education; offices, co-working place, etc. for work; cinema, gyms, etc. for leisure time; restaurants, bars, etc. for eat/sleep). When the activity “housework” is selected, we assign as destination the agent’s house node. We then assign a departure time for each scheduled activity by drawing a 10-minutes time slot from the distribution of oriented movements over time conditional on the specific activity \cite{site11}, which has to be performed approximately 40 minutes after the departure (40 minutes being the average traveling time). To allow for minute-by-minute departure times, we also include a randomization term that adds or removes at most 5 minutes from the picked time. 
+
+Finally, if the last destination of the agent is not “home”, we compute a critical time at which we let the agent depart again to go back home (time of the last activity + 40 min + average duration of last activity \cite{site11} + noise in the [-10 min, +10 min] interval). We consider two possible sets of average durations for the activities, set 2 having the values associated to education and paid work as the half of those in set 1. We assume that, if this critical time is after 10:30 p.m. the agent prefers not to use public transports to go back home, as the timetables are not favourable later in the evening.
+
+\begin{algorithm}
+\caption{Agents' generation following Strategy 1}\label{alg1}
+\begin{algorithmic}
+\Require $n \geq 0$
+\For {each agent $i = 1, ..., n$}:
+\State \textit{age\_class} $\sim Multinomial(p_l)$ \Comment{$p_l$ = P(age class l) for $l = 1, ..., 4$}
+\State $nil \sim Multinomial(q_{jl})$ \Comment{$q_j$ = P(nil j $\vert$ age\_class) for $j = 1, ..., 89$}
+\State $home \sim Uniform(k)$ \Comment{$ k = \frac{1}{\vert \{s: s \in nil \} \vert }$}
+\For {each activity a = 1, ..., 5}:
+\State $ u \sim Bernoulli(f_a)$ \Comment{$f_a$ = P(a $\vert$ age\_class)}
+\If{$u = 1$}:
+    \State $destination \sim Multinomial(g_s)$ \\\Comment{$g_s = \frac{\text{\# amenities of type a close to node s}}{\text{total \# of amenities of type a}}$}
+    \State \textit{departure\_time} $\sim Multinomial(r_t)$ \\\Comment{$r_t$ = P(travel time $\vert$ a) + U(-5, 5)}
+\EndIf
+\EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+At this point, for each agent we have: a unique id, the age group, the starting point (node on the network) and a schedule of activities (from 1 to 5 activities, with the related destination and the time at which the agent has to start the journey to get there), as shown in the table \ref{tab1} below. 
+
+\begin{table}[h]
+\centering
+\caption{Example of agent's generation}\label{tab1}%
+\begin{tabular}{ll|lll}
+\multicolumn{2}{c|}{The agent} & \multicolumn{3}{c}{The schedule} \\ 
+\toprule
+Features      & Data      & Activity & Destination & Departure time \\ 
+\midrule
+Unique id & 7548 & 1) Education & V.le Bligny, 19 & 7:30\\
+Age & 15-24  &  2) Work	& Duomo M3 & 14:15\\
+Starting point & Corvetto M3 & 3) Leisure & Moscova & 19:25\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The final step to complete the synthesis of the population is to assign to each agent the list of edges that form the shortest path to reach their destinations (Example in table \ref{tab2} below). Specifically, the shortest path is calculated through the Dijkstra algorithm, using as weight the traveling time of each edge. However, not all nodes are taken into account in this process. In fact, the shortest path is computed on the subgraph of the edges constituting the lines that are active in a limited time window around the departure time. In this way, the agent can only select routes that are available at the time of their departure. Lastly, since we are working on a multigraph, it may be the case that two stops are linked by two different means of transport. In this case, the agent includes in the shortest path the edges that minimize the number of changes of transport method needed.
