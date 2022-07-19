@@ -100,3 +100,5 @@ Starting point & Corvetto M3 & 3) Leisure & Moscova & 19:25\\
 \end{table}
 
 The final step to complete the synthesis of the population is to assign to each agent the list of edges that form the shortest path to reach their destinations (Example in table \ref{tab2} below). Specifically, the shortest path is calculated through the Dijkstra algorithm, using as weight the traveling time of each edge. However, not all nodes are taken into account in this process. In fact, the shortest path is computed on the subgraph of the edges constituting the lines that are active in a limited time window around the departure time. In this way, the agent can only select routes that are available at the time of their departure. Lastly, since we are working on a multigraph, it may be the case that two stops are linked by two different means of transport. In this case, the agent includes in the shortest path the edges that minimize the number of changes of transport method needed.
+
+mamao
