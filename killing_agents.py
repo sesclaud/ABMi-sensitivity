@@ -54,9 +54,9 @@ am_counts_df = pd.read_csv('data/am_counts_df_mani.csv')
 rescaled_ts = pd.read_csv('data/rescaled_ts.csv')
 orari = pd.read_csv('data/orari.csv')
 fermate = pd.read_csv('data/fermate.csv')
-act_probs_df = pd.read_csv('data/act_probs_df', index_col=0)
-act_list = list(pd.read_csv('data/act_list', index_col=0).to_dict('list').values())
-acti_count = pd.read_csv('data/acti_count', index_col=0).to_dict('list')
+act_probs_df = pd.read_csv('data/act_probs_df_2a', index_col=0)
+act_list = list(pd.read_csv('data/act_list_2a', index_col=0).to_dict('list').values())
+acti_count = pd.read_csv('data/acti_count_2a', index_col=0).to_dict('list')
 
 
 ############################################################################################################
@@ -903,15 +903,15 @@ def simulation_results(agents_list, history_, G, run, results = False):
     time_distance_dist = time_distance_distribution(history_, G)[0]
 
     if type(results) == bool and results == False:
-        results = pd.DataFrame(data = [run, num_agents, finished_perc, avg_number_activities, avg_traveling_per_dest, avg_waiting_per_dest, num_vehicles, time_distance_dist]).T
-        results.rename(columns = {0:'Run', 1:'Num_Agents', 2:'Finished', 3:'Avg_num_activities', 4:'Avg_traveling_per_dest', 5:'Avg_waiting_per_dest', 6:'Num_Vehicles', 7:'Time_distance_distribution'}, inplace=True)
+        results = pd.DataFrame(data = [run, num_agents, finished_perc, avg_number_activities, avg_traveling_per_dest, avg_waiting_per_dest, num_vehicles]).T
+        results.rename(columns = {0:'Run', 1:'Num_Agents', 2:'Finished', 3:'Avg_num_activities', 4:'Avg_traveling_per_dest', 5:'Avg_waiting_per_dest', 6:'Num_Vehicles'}, inplace=True)
     elif type(results) == pd.DataFrame:
-        res =  pd.DataFrame(data = [run, num_agents, finished_perc, avg_number_activities, avg_traveling_per_dest, avg_waiting_per_dest, num_vehicles, time_distance_dist]).T
-        res.rename(columns = {0:'Run', 1:'Num_Agents', 2:'Finished', 3:'Avg_num_activities', 4:'Avg_traveling_per_dest', 5:'Avg_waiting_per_dest', 6:'Num_Vehicles', 7:'Time_distance_distribution'}, inplace=True)
+        res =  pd.DataFrame(data = [run, num_agents, finished_perc, avg_number_activities, avg_traveling_per_dest, avg_waiting_per_dest, num_vehicles]).T
+        res.rename(columns = {0:'Run', 1:'Num_Agents', 2:'Finished', 3:'Avg_num_activities', 4:'Avg_traveling_per_dest', 5:'Avg_waiting_per_dest', 6:'Num_Vehicles'}, inplace=True)
         results = pd.concat([results,res])
     else:
         raise Exception ('Please provide a DataFrame to append results.')
-    return results
+    return results, time_distance_dist
 
 
 
@@ -1265,6 +1265,6 @@ def time_distance_distribution(history_, G):
                 position = int(position)
             previous_position = position
             
-    time_distances = np.array(time_distances)[np.array(time_distances) < np.quantile(time_distances, 0.95)]
+    # time_distances = np.array(time_distances)[np.array(time_distances) < np.quantile(time_distances, 0.95)]
                 
     return time_distances, distances, times
