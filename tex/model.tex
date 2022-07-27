@@ -1,12 +1,12 @@
 \section{The Model}
 The proposed model aims at simulating the mobility of individuals in Milan that use the public transport services, exploring the consequences of shocks and interventions that can affect directly the transport network. Specifically, the elements that constitute the model are:
 \begin{itemize}
-    \item \textbf{The environment:} the public transport network of Milan, including metro, tram, bus and filobus lines. 
+    \item \textbf{The environment:} the public transport network of Milan, including metro, tram, bus and filobus lines.
     \item \textbf{The agents:} synthetic individuals, constituting the flow of passengers on ATM vehicles.
     \item \textbf{The time:} the simulation is based on data regarding an ordinary week day, from 5:00 a.m. to 1.00 a.m. of the next day and each step represents 1 minute (for a total of 1200 steps).
     \item \textbf{The rules:} agents, according to their schedules, move on the network, respecting the timetables and the availability in terms of capacity on the vehicles.
 \end{itemize}
-The idea is to generate synthetic agents, place them on the graph representing the transport network of the city of Milan, and let them move around the city according to their schedules. Individuals interact with each others as they compete to get on the same vehicle, given that vehicles have limited capacity. Moreover, they interact with the environment, since they choose the shortest path to their destinations, according to network-specific attributes (i.e. distance between stops, speeds of the vehicles, lines' timetables). 
+The idea of the model is to generate synthetic agents, place them on the graph representing the transport network of the city of Milan, and let them move around the city according to their schedules. Individuals interact with each others as they compete to get on the same vehicle, since vehicles have limited capacity. Moreover, they interact with the environment, since they choose the shortest path to their destinations, according to network-specific attributes (i.e. distance between stops, speeds of the vehicles, lines' timetables). 
 
 \subsection{Data and manipulation}\label{sec3}
 The model is based on different datasets describing the Milan's transport network and population. We distinguish between those needed to build the transport network and those used in the process of synthesizing the population and highlight the main steps of the manipulation process.\\ \\
@@ -32,17 +32,23 @@ First, we adapt the different distributions, as to have homogeneous age classes.
 
 \subsection{The Network}\label{sec3}
 
-Data sources 1 to 4 are combined to construct a directed multigraph representing the public transport network of Milan: each node identifies a stop, while an edge between two stops denote the existence of a route of any transportation mean connceting them. In this way, two consecutive stops on the same transport line are joined by an edge. All the edges point in a single direction, and between two nodes there may be more than one link of different type. In our specific case, this happens when there are multiple routes that pass through two consecutive stops. We consider only the routes that are active during weekdays.
+Data sources 1 to 4 are combined to construct a directed multigraph, which is a graph with parallel edges, representing the public transport network of Milan: each node identifies a stop, while an edge between two stops denotes the existence of a route, of any transportation mean, connecting them. In this way, two consecutive stops on the same transport line are joined by an edge. All the edges point in a single direction, and between two nodes there may be multiple links of different types. In our specific case, this happens when there are two or more routes that pass through two consecutive stops. We consider only the routes that are active during weekdays.
 
 To compute the distances and better visualize the network, all the stops are placed and plotted in the space using their real geographic coordinates \cite{site2,site6}.  
-We add to the network edges representing a walking path connecting those stops that are not linked through transportation means but are close enough to be reached on foot from one another. In the original verion, we say that two stops are at walking distance if the geodesic distance between them is of maximum $r_{foot}$ = 200 meters. 
-The final graph, including transport means and walking paths, contains a total of 4753 nodes and 18470 edges. 
+We add to the network several edges representing walking paths connecting those stops that are not linked through transportation means but are close enough to be reached on foot from one another. In the original version of the model, we define two stops as "at walking distance" if the geodesic distance between them is of maximum $r_{foot}$ = 200 meters. The introduction of these additional edges allows to have a connected graph, a graph with only one component, which, in practice, gives agents the possibility to potentially find a path from any stop to any other one.
+The final graph, including transport means and walking paths, is shown in \ref{network_complete} and contains a total of 4753 nodes and 18470 edges. 
 
 Both nodes and edges have been endowed with some attributes.
 Each node is characterised by a unique id, which corresponds to the official AMAT id. For each stop, using data from dataset 7, we compute the number of reachable points of interests corresponding to schools, offices, amenities, and food courts. We say that a point of interest is reachable if it lies within the ball, centered at the stop, with radious equal to a value $r_{pois}$, menaning if its geodesic distance from the stop is less than or equal to a number $r_{pois}$, which in the original version was set to correspond to 500 meters.  
  
 Each edge is identified by the id of the two nodes that it connects and the specific line of the mean of transport (eg. 11497, 11500, TRAM12). Its attributes are: transport mode, total capacity, weight, next edges, waiting list and passengers list. The total capacity \cite{site13,site14,site15,site16} and the weight depend on the transport mode. Specifically, the weight represents the traveling time between two stops, which is computed by dividing the distance between stops by the average commercial speed of the vehicle \cite{site17}. "Next edges" is a list which, in most cases, refers to the following edge on the same line. However, there are cases in which forks of the line require a single edge to have two “next edges”. Instead, foot edges do not have “next edges”. Finally, the waiting list and the passengers list are created as empty lists, which will be filled during the simulation to allow to identify the travellers that are waiting for and boarding each vehicle. 
 
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.5]{tex/pics/network_complete_cut.png}
+    \caption{The public transportation network of Milan. Different transportation means are represented with different colors: metro line 1 is in rer, metro line 2 in green, metro line 3 in yellow, metro line 5 in violet, tram in brown, bus in pink and filobus in grey. Walking paths, for ($r_{foot} = 200 m$), are shown in light skyblue.}
+    \label{network_complete}
+\end{figure}
 
  \subsection{The Agents}\label{sec3}
  
@@ -71,7 +77,7 @@ The set used to compute the critical time is randomly chosen, for each agent, th
 We assume that, if this critical time is after 10:30 p.m. the agent prefers not to use public transports to go back home, as the timetables are not favourable later in the evening.
 
 \begin{algorithm}
-\caption{Agents' generation following Strategy 1}\label{alg1}
+\caption{Agents' generation}\label{alg1}
 \begin{algorithmic}
 \Require $n \geq 0$
 \For {each agent $i = 1, ..., n$}:
@@ -81,7 +87,7 @@ We assume that, if this critical time is after 10:30 p.m. the agent prefers not 
 \For {each activity a = 1, ..., 5}:
 \State $ u \sim Bernoulli(f_a)$ \Comment{$f_a$ = P(a $\vert$ age\_class)}
 \If{$u = 1$}:
-    \State $destination \sim Multinomial(g_s)$ \\ \Comment{$g_s = \frac{\text{\# amenities of type a close to node s}}{\text{total \# of amenities of type a}}$}
+    \State $destination \sim Multinomial(g_s)$ \\\Comment{$g_s = \frac{\text{\# amenities of type a close to node s}}{\text{total \# of amenities of type a}}$}
     \State \textit{departure\_time} $\sim Multinomial(r_t)$ \\\Comment{$r_t$ = P(travel time $\vert$ a) + U(-5, 5)}
 \EndIf
 \EndFor
