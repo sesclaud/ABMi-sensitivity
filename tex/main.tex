@@ -4,7 +4,8 @@
 % This is a simple template for a LaTeX document using the "article" class.
 % See "book", "report", "letter" for other types of document.
 
-\documentclass[11pt]{report} % use larger type; default would be 10pt
+\documentclass[12pt]{report} % use larger type; default would be 10pt
+% \documentclass[bibliography=totocnumbered, 12pt]{report}
 
 % \usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
 
@@ -20,6 +21,7 @@
 %   read geometry.pdf for detailed page layout information
 
 \usepackage{graphicx} % support the \includegraphics command and options
+\usepackage[font=footnotesize]{caption}
 
 % \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
 
@@ -30,6 +32,8 @@
 \usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
 \usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
 \usepackage[sorting = none]{biblatex}
+% \usepackage{biblatex}
+\usepackage{url}
 % These packages are all incorporated in the memoir class to one degree or another...
 
 %%% HEADERS & FOOTERS
@@ -44,20 +48,27 @@
 % \allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
 % (This matches ConTeXt defaults)
 
+\usepackage{mathtools}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{amsfonts}
 
-\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
-\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
-\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
-\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+% \usepackage[nottoc,notlot,notlof]{tocbibind} % Put the bibliography in the ToC
+% \usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+% \renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+% \renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
 
-%\usepackage{fontspec}
-%\setmainfont{Verdana}
+\usepackage{fontspec}
+\setmainfont{Verdana}
 
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+% \usepackage[toc,page]{appendix}
 
-\addbibresource{bibliography.bib}
-% \bibliography{bibliography}
+% \addbibresource{bibliography.bib}
+\bibliography{bibliography}
 
 
 \title{TESI}
@@ -66,7 +77,7 @@
          % otherwise the current date is printed 
 
 \begin{document}
-\maketitle
+% \maketitle
 
 %\section{First section}
 %
@@ -75,9 +86,17 @@
 %ihihih
 %
 %\break
+\tableofcontents
+\input{tex/ch1_introduction}
+\input{tex/ch2_literature}
+\input{tex/ch3_model}
+\input{tex/ch4_sensitivity_analysis}
+\input{tex/ch5_conclusion}
+% \begin{appendices}
+\appendix
+\input{tex/appendix}
+% \end{appendices}
 
-\input{model}
-
-\printbibliography
+\printbibliography[heading=bibintoc,title={Bibliography}]
 
 \end{document}
