@@ -62,6 +62,8 @@
 
 \usepackage{fontspec}
 \setmainfont{Verdana}
+\usepackage{setspace}
+
 
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -86,7 +88,10 @@
 %ihihih
 %
 %\break
+\singlespacing
 \tableofcontents
+
+\doublespacing
 \input{tex/ch1_introduction}
 \input{tex/ch2_literature}
 \input{tex/ch3_model}
@@ -96,7 +101,7 @@
 \appendix
 \input{tex/appendix}
 % \end{appendices}
-
+\singlespacing
 \printbibliography[heading=bibintoc,title={Bibliography}]
 
 \end{document}
