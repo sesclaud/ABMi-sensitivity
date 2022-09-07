@@ -4,7 +4,7 @@
 % This is a simple template for a LaTeX document using the "article" class.
 % See "book", "report", "letter" for other types of document.
 
-\documentclass[12pt]{report} % use larger type; default would be 10pt
+\documentclass[a4paper, 12pt, english]{scrreprt} % use larger type; default would be 10pt
 % \documentclass[bibliography=totocnumbered, 12pt]{report}
 
 % \usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
@@ -14,9 +14,9 @@
 % See the LaTeX Companion or other references for full information.
 
 %%% PAGE DIMENSIONS
-\usepackage{geometry} % to change the page dimensions
-\geometry{a4paper} % or letterpaper (US) or a5paper or....
-\geometry{margin=2.5cm} % for example, change the margins to 2 inches all round
+\usepackage[inner=2.5cm, outer=2.5cm, bottom=4cm, top=3cm]{geometry} % to change the page dimensions
+% \geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2.5cm} % for example, change the margins to 2 inches all round
 % \geometry{landscape} % set up the page for landscape
 %   read geometry.pdf for detailed page layout information
 
@@ -54,22 +54,22 @@
 \usepackage{booktabs}
 \usepackage{float}
 \usepackage{amsfonts}
+\usepackage{lscape}
 
 % \usepackage[nottoc,notlot,notlof]{tocbibind} % Put the bibliography in the ToC
 % \usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
 % \renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
 % \renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
 
-\usepackage{fontspec}
-\setmainfont{Verdana}
+% \usepackage{fontspec}
+% \setmainfont{Arial}
 \usepackage{setspace}
 
 
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-% \usepackage[toc,page]{appendix}
+% \usepackage[toc, title, page]{appendix} 
 
-% \addbibresource{bibliography.bib}
 \bibliography{bibliography}
 
 
@@ -97,10 +97,15 @@
 \input{tex/ch3_model}
 \input{tex/ch4_sensitivity_analysis}
 \input{tex/ch5_conclusion}
+
+
 % \begin{appendices}
 \appendix
+% \addcontentsline{toc}{chapter}{Appendix}
 \input{tex/appendix}
 % \end{appendices}
+
+
 \singlespacing
 \printbibliography[heading=bibintoc,title={Bibliography}]
 

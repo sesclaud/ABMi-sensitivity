@@ -1,13 +1,14 @@
 % \section{Appendix} \label{appendix}
 % \section{The Model}
-\chapter{Appendix} \label{appendix}
+\chapter{Appendix}  \label{appendix}
 % \newpage
 
+\section{The model}
 
 \begin{table}[H]
     \centering
 {\tiny
-\scalebox{0.7}{
+\scalebox{0.65}{
 \begin{tabular}{lp{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}}
 \toprule
 {} &  Average Population (Tot) &  Standard Error (Tot) &  Average Population (15-24) &  Standard Error (15-24) &  Average Population (25-44) &  Standard Error (25-44) &  Average Population (45-64) &  Standard Error (45-64) &  Average Population (65+) &  Standard Error (65+) \\
@@ -56,7 +57,7 @@ MONCUCCO - SAN CRISTOFORO                          &                    138.73 &
 MONLUE' - PONTE LAMBRO                             &                     52.50 &                  7.67 &                        8.98 &                    3.12 &                       17.39 &                    4.14 &                       17.29 &                    4.50 &                      8.84 &                  3.16 \\
 MORIVIONE                                          &                     80.03 &                  9.27 &                        9.68 &                    3.29 &                       24.34 &                    5.45 &                       26.49 &                    5.62 &                     19.52 &                  4.31 \\
 MUGGIANO                                           &                     30.15 &                  5.27 &                        5.04 &                    2.58 &                        7.29 &                    2.71 &                       12.85 &                    3.78 &                      4.97 &                  2.15 \\
-NIGUARDA - CA GRANDA - PRATO CENTENARO - Q.RE ... &                    370.80 &                 15.88 &                       40.24 &                    7.44 &                       95.42 &                    9.52 &                      119.96 &                   10.32 &                    115.18 &                  9.74 \\
+NIGUARDA - CA GRANDA - PRATO CENTENARO  &                    370.80 &                 15.88 &                       40.24 &                    7.44 &                       95.42 &                    9.52 &                      119.96 &                   10.32 &                    115.18 &                  9.74 \\
 ORTOMERCATO                                        &                     41.83 &                  6.56 &                        4.33 &                    1.98 &                       14.17 &                    3.87 &                       13.86 &                    3.84 &                      9.47 &                  3.01 \\
 PADOVA - TURRO - CRESCENZAGO                       &                    378.98 &                 18.48 &                       40.41 &                    5.64 &                      122.63 &                   10.59 &                      125.53 &                   10.04 &                     90.41 &                  9.69 \\
 PAGANO                                             &                    178.27 &                 14.24 &                       24.23 &                    5.50 &                       41.14 &                    6.12 &                       63.68 &                    7.85 &                     49.22 &                  7.41 \\
@@ -86,7 +87,7 @@ ROSERIO                                            &                      2.63 &
 SAN SIRO                                           &                    262.62 &                 16.40 &                       30.09 &                    4.84 &                       80.70 &                    9.60 &                       87.65 &                    9.01 &                     64.18 &                  7.46 \\
 SARPI                                              &                    306.50 &                 18.85 &                       30.77 &                    5.48 &                       97.13 &                    9.84 &                      105.60 &                    9.89 &                     73.00 &                  8.86 \\
 SCALO ROMANA                                       &                    122.48 &                 10.85 &                       12.89 &                    3.59 &                       43.91 &                    6.76 &                       39.74 &                    6.27 &                     25.94 &                  4.99 \\
-STADERA - CHIESA ROSSA - Q.RE TORRETTA - CONCA ... &                    299.46 &                 16.70 &                       33.93 &                    6.00 &                       86.86 &                    9.98 &                      100.90 &                    9.52 &                     77.77 &                  8.47 \\
+STADERA - CHIESA ROSSA - Q.RE TORRETTA  &                    299.46 &                 16.70 &                       33.93 &                    6.00 &                       86.86 &                    9.98 &                      100.90 &                    9.52 &                     77.77 &                  8.47 \\
 STADIO - IPPODROMI                                 &                    131.55 &                 11.25 &                       19.24 &                    4.82 &                       30.84 &                    4.96 &                       45.92 &                    6.55 &                     35.55 &                  6.41 \\
 STAZIONE CENTRALE - PONTE SEVESO                   &                    192.52 &                 12.56 &                       20.79 &                    4.48 &                       67.88 &                    8.05 &                       59.54 &                    7.46 &                     44.31 &                  6.38 \\
 STEPHENSON                                         &                      1.36 &                  1.11 &                        0.10 &                    0.30 &                        0.59 &                    0.73 &                        0.52 &                    0.73 &                      0.15 &                  0.36 \\
@@ -136,6 +137,257 @@ XXII MARZO                                         &                    320.18 &
     \label{pop_nil_65}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Sensitivity Analysis} \label{app_sa}
+
+\begin{table}[H]
+    \centering
+    \scalebox{0.8}{ 
+\begin{tabular}{lccccc}
+\toprule
+{} &  $r_{foot}$ &  tram speed &  $r_{pois}$ &  $p_{long}$ &  agents\_strategy \\
+\midrule
+1  &     100 &          11 &     200 &     0.7 &                1 \\
+2  &     100 &          14 &     200 &     0.7 &                1 \\
+3  &     100 &          11 &     500 &     0.7 &                1 \\
+4  &     100 &          14 &     500 &     0.7 &                1 \\
+5  &     200 &          11 &     200 &     0.7 &                1 \\
+6  &     200 &          14 &     200 &     0.7 &                1 \\
+7  &     200 &          11 &     500 &     0.7 &                1 \\
+8  &     200 &          14 &     500 &     0.7 &                1 \\
+9  &     100 &          11 &     200 &     0.6 &                1 \\
+10 &     100 &          14 &     200 &     0.6 &                1 \\
+11 &     100 &          11 &     500 &     0.6 &                1 \\
+12 &     100 &          14 &     500 &     0.6 &                1 \\
+13 &     200 &          11 &     200 &     0.6 &                1 \\
+14 &     200 &          14 &     200 &     0.6 &                1 \\
+15 &     200 &          11 &     500 &     0.6 &                1 \\
+16 &     200 &          14 &     500 &     0.6 &                1 \\
+17 &     100 &          11 &     200 &     0.5 &                1 \\
+18 &     100 &          14 &     200 &     0.5 &                1 \\
+19 &     100 &          11 &     500 &     0.5 &                1 \\
+20 &     100 &          14 &     500 &     0.5 &                1 \\
+21 &     200 &          11 &     200 &     0.5 &                1 \\
+22 &     200 &          14 &     200 &     0.5 &                1 \\
+23 &     200 &          11 &     500 &     0.5 &                1 \\
+24 &     200 &          14 &     500 &     0.5 &                1 \\
+25 &     100 &          11 &     200 &     0.7 &                2 \\
+26 &     100 &          14 &     200 &     0.7 &                2 \\
+27 &     100 &          11 &     500 &     0.7 &                2 \\
+28 &     100 &          14 &     500 &     0.7 &                2 \\
+29 &     200 &          11 &     200 &     0.7 &                2 \\
+30 &     200 &          14 &     200 &     0.7 &                2 \\
+31 &     200 &          11 &     500 &     0.7 &                2 \\
+32 &     200 &          14 &     500 &     0.7 &                2 \\
+33 &     100 &          11 &     200 &     0.6 &                2 \\
+34 &     100 &          14 &     200 &     0.6 &                2 \\
+35 &     100 &          11 &     500 &     0.6 &                2 \\
+36 &     100 &          14 &     500 &     0.6 &                2 \\
+37 &     200 &          11 &     200 &     0.6 &                2 \\
+38 &     200 &          14 &     200 &     0.6 &                2 \\
+39 &     200 &          11 &     500 &     0.6 &                2 \\
+40 &     200 &          14 &     500 &     0.6 &                2 \\
+41 &     100 &          11 &     200 &     0.5 &                2 \\
+42 &     100 &          14 &     200 &     0.5 &                2 \\
+43 &     100 &          11 &     500 &     0.5 &                2 \\
+44 &     100 &          14 &     500 &     0.5 &                2 \\
+45 &     200 &          11 &     200 &     0.5 &                2 \\
+46 &     200 &          14 &     200 &     0.5 &                2 \\
+47 &     200 &          11 &     500 &     0.5 &                2 \\
+48 &     200 &          14 &     500 &     0.5 &                2 \\
+\bottomrule
+\end{tabular}}
+    \caption{Parameters' values in the 48 settings of the full-factorial design.}
+    \label{tab:values_settings}
+\end{table}
 
 
 
+\begin{table}
+    \centering
+    \scalebox{0.8}{ 
+\begin{tabular}{lcccc}
+\toprule
+{} &  Sample Size &  Finished \% &  Mean \# activities &  Mean \# vehicles \\
+Run &              &             &                    &                  \\
+\midrule
+1   &      20381.0 &        0.94 &           2.108434 &              9.1 \\
+2   &      20548.0 &        0.97 &           2.099912 &              8.9 \\
+3   &      20492.0 &        0.94 &           2.104333 &              9.0 \\
+4   &      20462.0 &        0.97 &           2.107419 &              9.0 \\
+5   &      20445.0 &        0.97 &           2.111323 &              8.2 \\
+6   &      20505.0 &        0.98 &           2.104023 &              8.3 \\
+7   &      20501.0 &        0.97 &           2.101556 &              8.2 \\
+8   &      20444.0 &        0.98 &           2.112111 &              8.2 \\
+9   &      20444.0 &        0.94 &           2.094844 &              9.0 \\
+10  &      20379.0 &        0.97 &           2.099122 &              8.9 \\
+11  &      20416.0 &        0.94 &           2.098109 &              9.0 \\
+12  &      20402.0 &        0.97 &           2.103372 &              9.0 \\
+13  &      20458.0 &        0.96 &           2.095464 &              8.2 \\
+14  &      20360.0 &        0.98 &           2.105010 &              8.2 \\
+15  &      20511.0 &        0.97 &           2.093998 &              8.2 \\
+16  &      20432.0 &        0.98 &           2.108898 &              8.2 \\
+17  &      20458.0 &        0.94 &           2.093313 &              8.9 \\
+18  &      20406.0 &        0.97 &           2.094874 &              8.9 \\
+19  &      20419.0 &        0.94 &           2.097164 &              9.0 \\
+20  &      20403.0 &        0.97 &           2.099152 &              8.9 \\
+21  &      20463.0 &        0.97 &           2.105068 &              8.2 \\
+22  &      20406.0 &        0.98 &           2.090366 &              8.2 \\
+23  &      20396.0 &        0.97 &           2.091341 &              8.2 \\
+24  &      20471.0 &        0.98 &           2.095061 &              8.2 \\
+25  &      20000.0 &        0.92 &           2.457700 &              9.3 \\
+26  &      20000.0 &        0.96 &           2.454900 &              9.2 \\
+27  &      20000.0 &        0.92 &           2.452300 &              9.3 \\
+28  &      20000.0 &        0.96 &           2.449200 &              9.2 \\
+29  &      20000.0 &        0.95 &           2.452750 &              8.5 \\
+30  &      20000.0 &        0.98 &           2.456250 &              8.6 \\
+31  &      20000.0 &        0.96 &           2.456650 &              8.5 \\
+32  &      20000.0 &        0.98 &           2.456400 &              8.6 \\
+33  &      20000.0 &        0.92 &           2.450050 &              9.3 \\
+34  &      20000.0 &        0.96 &           2.450750 &              9.2 \\
+35  &      20000.0 &        0.92 &           2.448850 &              9.4 \\
+36  &      20000.0 &        0.96 &           2.450300 &              9.2 \\
+37  &      20000.0 &        0.95 &           2.448600 &              8.5 \\
+38  &      20000.0 &        0.98 &           2.454700 &              8.5 \\
+39  &      20000.0 &        0.95 &           2.446500 &              8.5 \\
+40  &      20000.0 &        0.98 &           2.446200 &              8.5 \\
+41  &      20000.0 &        0.92 &           2.442100 &              9.3 \\
+42  &      20000.0 &        0.96 &           2.444150 &              9.2 \\
+43  &      20000.0 &        0.92 &           2.443050 &              9.3 \\
+44  &      20000.0 &        0.96 &           2.443050 &              9.2 \\
+45  &      20000.0 &        0.96 &           2.441950 &              8.4 \\
+46  &      20000.0 &        0.98 &           2.443350 &              8.5 \\
+47  &      20000.0 &        0.96 &           2.440000 &              8.4 \\
+48  &      20000.0 &        0.98 &           2.444000 &              8.4 \\
+\bottomrule
+\end{tabular}}
+    \caption{Detailed description of the 48 settings' model runs in terms of sample size, percentage of agents completing their schedule, mean number of activities performed and mean number of vehicles used.}
+    \label{tab:runs_tot}
+\end{table}
+
+
+\subsection*{Finite differences} \label{app:fd}
+%%%%%%%%%%%%%%%%%%%%% MAIN EFFECTS %%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{table}[H]
+    \raggedright
+\scriptsize{
+\begin{tabular}{lccc}
+\toprule
+{} &  full\_edges &  mean\_minkm &  mean\_wt \\
+\midrule
+r\_foot          &          -7 &    2.608053 &                  -0.4 \\
+tram\_speed      &           2 &    4.032318 &                   8.1 \\
+r\_pois          &          -6 &   -1.211881 &                  -4.7 \\
+p\_long\_1        &          -8 &   -1.114381 &                  -4.8 \\
+p\_long\_2        &          -5 &   -1.062639 &                  -4.6 \\
+agents\_strategy &          -5 &   -0.578849 &                  -2.7 \\
+\bottomrule
+\end{tabular}}
+    \caption{Main effects of model parameters on the three model outputs.}
+    \label{tab:main_effects}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%% INTERACTION EFFECTS %%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%% couples
+
+\begin{table}[H]
+    \raggedright
+\scriptsize{
+\begin{tabular}{lccc}
+\toprule
+{} &  full\_edges &  mean\_minkm &  mean\_wt \\
+\midrule
+r\_foot, r\_pois              &        15.0 &    2.614833 &                  12.1 \\
+r\_foot, tram\_speed          &        -2.0 &   -4.032318 &                  -8.1 \\
+tram\_speed, r\_pois          &        -2.0 &   -4.032318 &                  -8.1 \\
+r\_foot, p\_long\_1            &        17.0 &    2.463112 &                  11.7 \\
+r\_pois, p\_long\_1            &        17.0 &    2.729953 &                  10.8 \\
+tram\_speed, p\_long\_1        &        -2.0 &   -4.032318 &                  -8.1 \\
+r\_foot, p\_long\_2            &        17.0 &    2.352274 &                  13.1 \\
+r\_pois, p\_long\_2            &        11.0 &    2.402780 &                   9.4 \\
+tram\_speed, p\_long\_2        &        -2.0 &   -4.032318 &                  -8.1 \\
+r\_foot, agents\_strategy     &        17.0 &    2.371301 &                  14.9 \\
+r\_pois, agents\_strategy     &        15.0 &    2.144272 &                  10.0 \\
+tram\_speed, agents\_strategy &        -2.0 &   -4.032318 &                  -8.1 \\
+p\_long\_1, agents\_strategy   &        14.0 &    2.021077 &                  10.0 \\
+p\_long\_2, agents\_strategy   &        15.0 &    2.040064 &                   9.5 \\
+\bottomrule
+\end{tabular}}
+    \caption{Second-order finite differences interaction effects. Values are computed separately for the scenarios in which $p\_long$ is set to 0.6 ($p\_long\_1$) and to 0.5 ($p\_long\_1$).}
+    \label{tab:couples}
+\end{table}
+
+%%%%%%%%% triplets
+
+\begin{table}[H]
+    \raggedright
+    \scriptsize{
+\begin{tabular}{lccc}
+\toprule
+{} &  full\_edges &  mean\_minkm &  mean\_wt \\
+\midrule
+r\_foot, tram\_speed, r\_pois            &       -12.0 &    1.197498 &                  -3.7 \\
+r\_foot, r\_pois, p\_long\_1              &       -34.0 &   -5.171752 &                 -21.4 \\
+r\_foot, tram\_speed, p\_long\_1          &       -17.0 &    1.777604 &                  -2.2 \\
+tram\_speed, r\_pois, p\_long\_1          &       -15.0 &    1.407695 &                  -2.6 \\
+r\_foot, r\_pois, p\_long\_2              &       -26.0 &   -4.956567 &                 -21.7 \\
+r\_foot, tram\_speed, p\_long\_2          &       -17.0 &    1.181018 &                  -5.2 \\
+tram\_speed, r\_pois, p\_long\_2          &        -8.0 &    1.979365 &                  -1.0 \\
+r\_foot, r\_pois, agents\_strategy       &       -27.0 &   -4.451725 &                 -21.6 \\
+r\_foot, tram\_speed, agents\_strategy   &       -10.0 &    1.913512 &                  -4.3 \\
+tram\_speed, r\_pois, agents\_strategy   &       -10.0 &    2.341368 &                  -0.1 \\
+r\_foot, p\_long\_1, agents\_strategy     &       -26.0 &   -4.098669 &                 -20.4 \\
+r\_pois, p\_long\_1, agents\_strategy     &       -27.0 &   -4.090091 &                 -18.6 \\
+tram\_speed, p\_long\_1, agents\_strategy &        -6.0 &    2.686818 &                   0.2 \\
+r\_foot, p\_long\_2, agents\_strategy     &       -30.0 &   -4.196952 &                 -21.3 \\
+r\_pois, p\_long\_2, agents\_strategy     &       -29.0 &   -3.969284 &                 -17.2 \\
+tram\_speed, p\_long\_2, agents\_strategy &       -11.0 &    2.397527 &                   0.2 \\
+\bottomrule
+\end{tabular}}
+    \caption{Third-order finite differences interaction effects. Values are computed separately for the scenarios in which $p\_long$ is set to 0.6 ($p\_long\_1$) and to 0.5 ($p\_long\_1$).}
+    \label{tab:triplets}
+\end{table}
+
+%%%%%%%%% quadriplets
+
+\begin{table}[H]
+    \raggedright
+    \scriptsize{
+\begin{tabular}{lccc}
+\toprule
+{} &  full\_edges &  mean\_minkm &  mean\_wt \\
+\midrule
+r\_foot, tram\_speed, r\_pois, p\_long\_1          &        65.0 &    2.243868 &                  26.0 \\
+r\_foot, tram\_speed, r\_pois, p\_long\_2          &        51.0 &    1.845361 &                  28.3 \\
+r\_foot, tram\_speed, r\_pois, agents\_strategy   &        51.0 &    0.932117 &                  28.6 \\
+r\_foot, r\_pois, p\_long\_1, agents\_strategy     &        88.0 &   13.136178 &                  64.5 \\
+r\_foot, tram\_speed, p\_long\_1, agents\_strategy &        53.0 &   -0.296544 &                  26.5 \\
+tram\_speed, r\_pois, p\_long\_1, agents\_strategy &        44.0 &   -0.598281 &                  19.9 \\
+r\_foot, r\_pois, p\_long\_2, agents\_strategy     &        91.0 &   13.260092 &                  63.2 \\
+r\_foot, tram\_speed, p\_long\_2, agents\_strategy &        60.0 &    0.633614 &                  27.9 \\
+tram\_speed, r\_pois, p\_long\_2, agents\_strategy &        50.0 &   -0.536778 &                  18.5 \\
+\bottomrule
+\end{tabular}}
+    \caption{Fourth-order finite differences interaction effects. Values are computed separately for the scenarios in which $p\_long$ is set to 0.6 ($p\_long\_1$) and to 0.5 ($p\_long\_1$).}
+    \label{tab:quadriplets}
+\end{table}
+
+%%%%%%%% quintuplets
+
+\begin{table}[H]
+    \raggedright
+    \scriptsize{
+\begin{tabular}{lccc}
+\toprule
+{} &  full\_edges &  mean\_minkm &  mean\_wt \\
+\midrule
+r\_foot, tram\_speed, r\_pois, p\_long\_1, agents\_strategy &        69.0 &    2.613800 &                  29.2 \\
+r\_foot, tram\_speed, r\_pois, p\_long\_2, agents\_strategy &        53.0 &    2.294693 &                  30.2 \\
+\bottomrule
+\end{tabular}}
+    \caption{Fifth-order finite differences interaction effects. Values are computed separately for the scenarios in which $p\_long$ is set to 0.6 ($p\_long\_1$) and to 0.5 ($p\_long\_1$).}
+    \label{tab:quintuplets}
+\end{table}

@@ -2,7 +2,6 @@
 
 % OVERVIEW DEL CHAPTER
 In this chapter, I will propose a new Agent-Based Model simulating the mobility of the individuals in Milan that use public transportation services. The model serves the purpose of exploring the consequences of shocks and interventions that directly affect the transport network, allowing decision-makers to plan policies and interventions in a more conscious way. The idea of the model is to reproduce the transport network of the city of Milan as a graph, generate synthetic agents, place them on the graph, and let them move around the city according to their schedules. Individuals interact with each other's as they compete to get on the same vehicle, since vehicles have limited capacity. Moreover, they interact with the environment, since they evaluate all the routes that are available given the current network, and choose the shortest path to their destinations, according to network-specific attributes (i.e. distance between stops, speeds of the vehicles, lines' timetables). 
-
 The proposed model is characterized by four elements:
 \begin{itemize}
     \item \textbf{The environment:} the public transport network of Milan, including metro, tram, bus and filobus lines, managed by Azienda Trasporti Milanesi (ATM).
@@ -16,7 +15,7 @@ In Section \ref{sec:3.1}, I will describe the main data sources I used to build 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Data sources}\label{sec:3.1}
-The model is constructed upon data coming from different datasets describing Milan's transportation network and population. We can distinguish between those needed to build the transport network and those used in the process of synthesizing the population, and highlight the main steps of the manipulation process.\\ \\
+The model is constructed upon data coming from different datasets describing Milan's transportation network and population. We can distinguish between those needed to build the transport network and those used in the process of synthesizing the population, and highlight the main steps of the manipulation process.\\
 The datasets used to build the network are the following:
 \begin{enumerate} 
     \item Two datasets \cite{site1, site5} from Comune di Milano's open data, containing the main features characterizing each route of the underground lines and of the surface transit lines respectively: an id number, the mean of transport, the line, the terminal points and their geographical coordinates, the length and the number of stops. Here, a line can have multiple routes, active in different time ranges.  
@@ -25,9 +24,9 @@ The datasets used to build the network are the following:
     \item Two datasets \cite{site4, site8} from Comune di Milano's open data, containing the starting time, the ending time, the type of day (weekday, holiday, weekend) for each route of the underground lines and  of the surface transit lines respectively. 
     \item Datasets \cite{site12} of GTFS\footnote{General Transit Feed Specification, common format for public transportation schedules and associated geographic information.} containing, for each stop, the transit times of all the means of transport, according to the timetables for ordinary weekdays. 
     \item Dataset mapping each stop, defined by the couple of its geographic coordinates, to the NIL\footnote{Nuclei d'Identità Locale, partition of the territory of Milan, introduced in the PGT (Piano di Governo del Territorio).} it belongs to, obtained from an open interactive web-map of Milan \cite{site22}.
-    \item Dataset of OpenStreetMap containing information about the geographic area of Milan and the main points of interests.
+    \item Dataset of OpenStreetMap containing information about the geographic area of Milan and the main points of interests \cite{site9}.
 \end{enumerate} 
-I discard routes running only on weekends and holidays and, for each of the remaining routes, obtain the couples of ordered stops representing its sequence. From the OpenStreetMap file (data source 7), I derive the complete list of the points of interest that are present on Milan's territory. I consider only points of interest of selected types, which are categorized into 'amenity', 'shop', 'school', 'leisure', 'office', as they are the most related to the activities the agents in the model will be performing. \\\\
+I discard routes running only on weekends and holidays and, for each of the remaining routes, obtain the couples of ordered stops representing its sequence. From the OpenStreetMap file (data source 7), I derive the complete list of the points of interest that are present on Milan's territory. I consider only points of interest of selected types, which are categorized into 'amenity', 'shop', 'school', 'leisure', 'office', as they are the most related to the activities the agents in the model will be performing. \\
 The datasets used to synthesize the population are the following:
 \begin{enumerate}
 \setcounter{enumi}{7}
@@ -64,7 +63,6 @@ Each edge is uniquely identified by the 3-tuple containing the ids of the two no
  
 Agents in the model represent the share of Milan's population which, during weekdays, moves around the city using public transports. I assume that the subpopulation of people moving regularly using public transports has the same distribution by age as the total population of residents, which can be found in \cite{site18}, updated to 2021. I only consider individuals that are older than 14 years old, and each agent belongs to one among 4 possible age classes: 15-24 years old ($\approx 11\%$ of the population), 25-44 years old ($\approx 30\%)$, 45-64 years old ($\approx 34\%)$ and over 65 years old ($\approx 25\%)$.
 In this model we account for both systematic mobility, meaning the journeys made for study and working purposes, which happen regularly, and non-systematic mobility, namely those trips that take place less regularly and are attributable to reasons like meeting friends, eating out, going shopping or doing personal activities. I rely on Istat data about Italian population's use of time during an ordinary weekday \cite{site14}, updated to 2013. Agents start their daily routine at home, perform from 1 to 5 activities (among education, work, leisure, self-care/eating\footnote{Istat actually provides a category that includes eat, sleep and other self-care. However, given the time horizon I consider (5:00 a.m  to 1:00 a.m), I assume that “sleep” can be neglected.} and housework) and, eventually, go back home. \\
-
 The creation of the synthetic population proceeds through different steps. First, for each agent I draw an age class from the distribution of inhabitants of Milan. Then, I draw a NIL for the agent's house from the distribution of the NILs conditional on the chosen age group \cite{site18}. Finally, I draw, uniformly at random from the stops in the selected NIL, a precise node which represents the agent’s home. 
 
 At this point, two possible strategies can be adopted to assign a travel diary to the agents:
@@ -72,9 +70,9 @@ At this point, two possible strategies can be adopted to assign a travel diary t
     \item \textbf{Strategy 1.} For each of the five possible activities, I decide whether the agent will or will not perform it during the day, by drawing from a Bernoulli with parameter equal to the probability that the agent carries out such activity in an ordinary weekday, conditional on the agent's age class. Data used to construct this probability distribution come from data source 9. Adopting this strategy, each agent can have a variable number of activities to carry out, ranging from 1 to 5. The strategy is summarized in the algorithm \ref{alg1} below.
     \item \textbf{Strategy 2.} Agents are forced to perform a number $k$ of activities. The combination of activities to perform is drawn with replacement from the distribution of possible combinations conditional on the age group the agent belongs to. Specifically, I consider the choices of activities as independent of each other, so that the conditional probability of each combination corresponds to the product of the conditional probabilities of the single activities in it. The strategy is summarized in the algorithm \ref{alg2} below.
 \end{itemize}
-In the original version of the model, strategy 1 has been adopted. On average, using strategy 1, around $20\%$ of the initially generated agents come with no planned activities in their schedule and, therefore, are discarded. Experiments show that agents' schedules only contain 2 activities on average. To make the results of the two strategies comparable in terms of traffic load on the network, the parameter k for the second strategy will be set to 2 by default for following experiments. 
 
-\begin{algorithm}[h!]
+\pagebreak
+\begin{algorithm}[H]
 \caption{Agents' generation - strategy 1}\label{alg1}
 \begin{algorithmic}
 \Require $n \geq 0$
@@ -93,7 +91,7 @@ In the original version of the model, strategy 1 has been adopted. On average, u
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}[h!]
+\begin{algorithm}[H]
 \caption{Agents' generation - strategy 2}\label{alg2}
 \begin{algorithmic}
 \Require $n \geq 0$
@@ -113,6 +111,7 @@ In the original version of the model, strategy 1 has been adopted. On average, u
 \EndFor
 \end{algorithmic}
 \end{algorithm}
+In the original version of the model, strategy 1 has been adopted. On average, using strategy 1, around $20\%$ of the initially generated agents come with no planned activities in their schedule and, therefore, are discarded. Experiments show that agents' schedules only contain 2 activities on average. To make the results of the two strategies comparable in terms of traffic load on the network, the parameter k for the second strategy will be set to 2 by default for following experiments. 
 
 I assign a location to each activity selected for the agent (i.e. the specific node in the network) with probability proportional to the number of facilities corresponding to that task that are located nearby each node \cite{site9}. Among the possible categories proposed by OpenStreetMap, I only take into consideration the ones that match Istat activities (eg. schools, universities, etc. for education; offices, co-working place, etc. for work; cinema, gyms, etc. for leisure time; restaurants, bars, etc. for eat/sleep). When the activity “housework” is selected, I assign as destination of the trip the node corresponding to the agent’s house. I then appoint a departure time to each scheduled activity by drawing a 10-minutes time slot from the distribution of oriented movements over time, conditional on the specific activity \cite{site11} shifted back by 40 minutes, as I assume the activity will be performed approximately 40 min after the departure (40 minutes being the average traveling time according to \cite{bib2}). To allow for minute-by-minute departure times, I also include a randomization term that adds or removes at most 5 minutes from the picked time. 
 
@@ -144,7 +143,7 @@ Starting point & Corvetto M3 & 3) Leisure & Moscova & 19:25\\
 \end{tabular}
 \end{table}
 
-The final step to complete the synthesis of the population is to assign to each agent the list of edges that form the shortest path they will use to reach their destinations. Specifically, the shortest path is calculated through the Dijkstra algorithm, using as weight for each edge its traveling time. However, not all nodes are taken into account in this process. In fact, the shortest path is computed on the subgraph of the edges constituting the transportation lines that are active in a limited time window around the departure time. In this way, the agent can only select routes that are available at the time of their departure. This means that two agents who have been assigned the same couple of departure and destination stops may take two different paths to reach their common destination if the trips are scheduled at different times during the day. Lastly, since I am working on a multigraph, it may be the case that two stops are linked by two different means of transport with same speed. In this case, the agent includes in the shortest path the edges that minimize the number of changes of vehicles needed. \\
+The final step to complete the synthesis of the population is to assign to each agent the list of edges that form the shortest path they will use to reach their destinations. Specifically, the shortest path is calculated through the Dijkstra algorithm, using as weight for each edge its traveling time. However, not all nodes are taken into account in this process. In fact, the shortest path is computed on the subgraph of the edges constituting the transportation lines that are active in a limited time window around the departure time. In this way, the agent can only select routes that are available at the time of their departure. This means that two agents who have been assigned the same couple of departure and destination stops may take two different paths to reach their common destination if the trips are scheduled at different times during the day. Lastly, since I am working on a multigraph, it may be the case that two stops are linked by two different means of transport with same speed. In this case, the agent includes in the shortest path the edges that minimize the number of changes of vehicles needed. 
 
 
 Agents are characterized by a state, which can take four possible values: busy, waiting, traveling and finished. Busy agents are those that are currently in one of the facilities and do not have to travel. Waiting agents are the ones waiting at a stop in order to get on a vehicle. Traveling agents are situated on edges, and they are moving to their next destination. Finally, finished agents are those that have already completed all the journeys in their daily schedule. 
@@ -154,45 +153,50 @@ Agents are characterized by a state, which can take four possible values: busy, 
 \subsection*{Validation of the synthetic population}\label{ssec:3.3.1}
 
 Although the synthesis of the population is stochastic, as it involves multiple draws from different distributions of demographic and geographical features, choosing a large sample size allows to obtain samples of synthetic agents which resemble the true population. I estimate that the individuals take, on average, 8 different vehicles during the day: counting each time an agent takes a different vehicle as a separate passenger, if I start with 20000 agents then I get a total of 160000 synthetic passengers per simulation. If I treat each of them as representing 10 real people, and adjust vehicles' capacities accordingly, then I am able to run a simulation that represents the whole population of daily travelers on all the transport network of Milan, which amounts to 1590000 people, as reported in \cite{site20}. A sample size of 20000 agents is believed to be large enough to achieve low variability of agents' characteristics across different samples. To demonstrate this, I have generated 100 samples of 20000 synthetic agents, observed the distributions of multiple characteristics and computed means and standard deviations. The reported bar charts show that the observed distributions don't deviate significantly from the true ones. Numerical values for the means and standard deviations are available in the \nameref{appendix}.
-One can easily see that the true relative proportions of age classes are preserved, with low standard error, as shown in figure \ref{pop_age}. Similarly, the estimated relative proportions of the population resident in each NIL resemble the true distribution, as shown in figure \ref{pop_nil_tot}. Details about the distribution of the population by NIL conditional on age classes are reported in the \nameref{appendix}. The last distribution observed is that of the combinations of activities performed by agents, under assignment strategies 1 and 2. The bar charts in figures \ref{pop_act} and \ref{pop_act2} show, on the left, in blue, the weighted average of the probabilities of the different combinations of activities, with weights equal to the proportions of the four age classes, and, on the right, in orange, the observed number of individuals per combination, averaged across samples. It is easy to see that variability across samples is low in both cases, and the observed proportions resemble the sampling distributions.
+One can easily see that the true relative proportions of age classes are preserved, with low standard error, as shown in figure \ref{pop_age}. Similarly, the estimated relative proportions of the population resident in each NIL resemble the true distribution, as shown in figure \ref{pop_nil_tot}. Details about the distribution of the population by NIL conditional on age classes are reported in the \nameref{appendix}. Another distribution observed is that of the combinations of activities performed by agents, under assignment strategies 1 and 2. The bar charts in figures \ref{pop_act} and \ref{pop_act2} show, on the left, in blue, the weighted average of the probabilities of the different combinations of activities, with weights equal to the proportions of the four age classes, and, on the right, in orange, the observed number of individuals per combination, averaged across samples. It is easy to see that variability across samples is low in both cases, and the observed proportions resemble the sampling distributions. Lastly, I compared the percentages of agents who have been scheduled to return home after their last activity across multiple runs, with 3 possible values for $p_{long}$, under the two different strategies. The averages for each combination are reported in figure \ref{p_long_as} and again the standard deviation is extremely low across runs.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[scale = 0.5]{tex/pics/pop_by_age.png}
     \caption{Comparison between the true population distribution by age (in blue) and the observed one (in orange) with standard error, averaged across 100 samples.}
     \label{pop_age}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[scale = 0.45]{tex/pics/pop_by_nil_tot.png}
     \caption{Comparison between the true population distribution by NIL (in blue) and the observed one (in orange) with standard error, averaged across 100 samples.}
     \label{pop_nil_tot}
 \end{figure}
 
-
-
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[scale = 0.35]{tex/pics/pop_by_act.png}
     \caption{Comparison between the true population distribution by activities performed (in blue) and the observed one (in orange) with standard error, averaged across 100 samples. Strategy 1 is used to assign activities to agents.}
     \label{pop_act}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[scale = 0.4]{tex/pics/pop_by_act2.png}
     \caption{Comparison between the true population distribution by activities performed (in blue) and the observed one (in orange) with standard error, averaged across 100 samples. Strategy 2 is used to assign activities to agents.}
     \label{pop_act2}
 \end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{tex/pics/p_long_as.png}
+    \caption{Comparison between the percentages of agents who have been scheduled to return home after their last activity across multiple runs, with 3 possible values for $p_{long}$, using the two different strategies.}
+    \label{p_long_as}
+\end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \pagebreak
 \section{The Rules}\label{sec:3.4}
 
 Once the population of agents has been synthesized, all agents are initialized to the busy status and let move on the network to reach the destinations in their schedule. 
 The typical simulation reproduces 20 hours, from 5:00 a.m. to 1:00 a.m. of the next day, but start and end time can be customized.
-Each iteration of the simulation represents one minute. At each minute, I activate agents within groups in random order, to avoid giving the first-mover advantage to the same individual at each timestep. I first consider the set of “busy” agents: if they are scheduled to depart at the current minute, their status changes to “waiting”, otherwise, they remain “busy” at their current position. I then loop over the “traveling” agents: looking at their path, they evaluate whether they have to get off the current vehicle and disembark if that is the case. Clearly, they can only do so if the vehicle has gone across the edge and reached the next stop. Edges in the graph can be either active or inactive at any given time step: an edge is active at minute t if there’s a vehicle that is stopping at the starting node of the edge and can embark passengers. “Waiting” agents are the last to act: each of them looks at the next edge in their path and, if it is active and there’s space on the vehicle, they get on board, while, if that is not the case, they stay on the stop waiting for the next activation. Once an agent completes all of its tasks, its status changes to “finished” and it is no longer considered in the following iterations. It can happen that agents are scheduled to depart for an activity very late in the night, when rides are less frequent, so they fail to complete their journey, and their status never becomes “finished”. I assume that, in this case, they will use alternative ways, not covered in our model, to proceed. \\
+Each iteration of the simulation represents one minute. At each minute, I activate agents within groups in random order, to avoid giving the first-mover advantage to the same individual at each timestep. I first consider the set of “busy” agents: if they are scheduled to depart at the current minute, their status changes to “waiting”, otherwise, they remain “busy” at their current position. I then loop over the “traveling” agents: looking at their path, they evaluate whether they have to get off the current vehicle and disembark if that is the case. Clearly, they can only do so if the vehicle has gone across the edge and reached the next stop. Edges in the graph can be either active or inactive at any given time step: an edge is active at minute t if there’s a vehicle that is stopping at the starting node of the edge and can embark passengers. “Waiting” agents are the last to act: each of them looks at the next edge in their path and, if it is active and there’s space on the vehicle, they get on board, while, if that is not the case, they stay on the stop waiting for the next activation. Once an agent completes all of its tasks, its status changes to “finished” and it is no longer considered in the following iterations. It can happen that agents are scheduled to depart for an activity very late in the night, when rides are less frequent, so they fail to complete their journey, and their status never becomes “finished”. I assume that, in this case, they will use alternative ways, not covered in our model, to proceed. 
 
 Now that we have described all the ingredients that characterized the model, we can summarize it by mapping its elements into the sets presented by Borgonovo et al. in \cite{Borgonovo2022SensitivityAO}:
 \begin{itemize}
