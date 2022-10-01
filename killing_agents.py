@@ -125,11 +125,15 @@ def gen_agent(n, d_ages = d_ages, d_activities = d_activities, age_distro = age_
         act_by_age = [[] for ind in range(count_by_age)]
         departures_by_age = [] # where departure times will be stored
         activities_df = activities[activities["Classe di età"]==age_class].sort_values("Tipo attività").reset_index(drop = True)
+        act_sum = activities_df.Value.sum()
+        # print(act_sum)
+        # print(type(act_sum))
         
         for act in activities_df["Tipo attività"].unique():
             activity = d_activities[act]
             activities_df_ = activities_df[activities_df["Tipo attività"]== act].reset_index(drop = True)
-            probability = activities_df_.Value.tolist()[0]/100
+            # probability = activities_df_.Value.tolist()[0]/100
+            probability = activities_df_.Value.tolist()[0]/act_sum
             act_ = multinomial(count_by_age, [1-probability, probability])
             num_ag = act_[1]
             act_nonzero = act_.nonzero()[0]
