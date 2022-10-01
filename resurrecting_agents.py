@@ -25,7 +25,7 @@ def parse_edge(ed):
     o = ed.replace("(","").replace(")","").replace("'","").split(", ")
     # print(o)
     if "skip" in o:
-        return o
+        return "skip"
     else:
         return (int(o[0]),int(o[1]),o[2])
 
